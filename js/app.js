@@ -341,7 +341,7 @@ const BUILTIN_ITEMS = {
   'app:spaces': { id: 'app:spaces', kind: 'app', app: 'spaces', title: 'Spaces' }
 };
 
-const APP_VERSION = '2.1.1';
+const APP_VERSION = '2.1.2';
 const MAX_SPACES = 3;
 const DEFAULT_SPACE_ID = 'space-main';
 const SPACE_COLORS = Object.freeze(['#b7b7bc', '#8ea4d2', '#c7a6b8', '#a8c9b5', '#d2bd96']);
@@ -2642,7 +2642,7 @@ function createSettingsWindow() {
     icon: 'settings',
     width: 920,
     height: 700,
-    body: `<div class="settings-tabs" role="tablist"><button type="button" class="settings-tab is-active" data-settings-tab="settings" role="tab">Einstellungen</button><button type="button" class="settings-tab" data-settings-tab="editor" role="tab">Editor</button><button type="button" class="settings-tab" data-settings-tab="widgets" role="tab">Widgets</button><button type="button" class="settings-tab" data-settings-tab="spaces" role="tab">Spaces</button></div><div class="settings-window__panes"></div>`
+    body: `<div class="settings-tabs" role="tablist"><div class="settings-tabs-group" role="presentation"><button type="button" class="settings-tab is-active" data-settings-tab="settings" role="tab" aria-selected="true">Einstellungen</button><button type="button" class="settings-tab" data-settings-tab="editor" role="tab" aria-selected="false" tabindex="-1">Editor</button><button type="button" class="settings-tab" data-settings-tab="widgets" role="tab" aria-selected="false" tabindex="-1">Widgets</button><button type="button" class="settings-tab" data-settings-tab="spaces" role="tab" aria-selected="false" tabindex="-1">Spaces</button></div></div><div class="settings-window__panes"></div>`
   });
   const panes = $('.settings-window__panes', shell.win);
   refs.settingsWindow = shell.win;
@@ -2697,6 +2697,7 @@ function createSettingsWindow() {
   refs.settingsTabs.forEach((tab) => {
     tab.addEventListener('click', () => switchSettingsTab(tab.dataset.settingsTab));
   });
+  bindSettingsTabKeys();
   hydrateIcons(refs.settingsWidgetsTab);
   hydrateIcons(refs.settingsSpacesTab);
   bindWidgetsPane(refs.settingsWidgetsTab);
@@ -2706,13 +2707,41 @@ function createSettingsWindow() {
   bindWindowShell(shell, () => toggleSettings(false), null, { keepOnClose: true, deferFocus: true });
 }
 
+function bindSettingsTabKeys() {
+  const tabs = refs.settingsTabs;
+  if (!tabs?.length || tabs[0].dataset.tabKeysBound === 'true') return;
+  tabs[0].dataset.tabKeysBound = 'true';
+  const list = tabs[0].closest('[role="tablist"]');
+  if (!list) return;
+  list.addEventListener('keydown', (event) => {
+    const keys = ['ArrowLeft', 'ArrowRight', 'Home', 'End'];
+    if (!keys.includes(event.key)) return;
+    event.preventDefault();
+    const current = tabs.findIndex((tab) => tab.classList.contains('is-active'));
+    let next = current < 0 ? 0 : current;
+    if (event.key === 'ArrowLeft') next = (current - 1 + tabs.length) % tabs.length;
+    else if (event.key === 'ArrowRight') next = (current + 1) % tabs.length;
+    else if (event.key === 'Home') next = 0;
+    else if (event.key === 'End') next = tabs.length - 1;
+    const target = tabs[next];
+    if (!target) return;
+    switchSettingsTab(target.dataset.settingsTab);
+    target.focus();
+  });
+}
+
 function switchSettingsTab(tab) {
   createSettingsWindow();
   const editor = tab === 'editor';
   const widgets = tab === 'widgets';
   const spaces = tab === 'spaces';
   const settings = tab === 'settings';
-  refs.settingsTabs?.forEach((button) => button.classList.toggle('is-active', button.dataset.settingsTab === tab));
+  refs.settingsTabs?.forEach((button) => {
+    const isActive = button.dataset.settingsTab === tab;
+    button.classList.toggle('is-active', isActive);
+    button.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    button.tabIndex = isActive ? 0 : -1;
+  });
   refs.settingsPanel.classList.toggle('is-hidden', !settings);
   refs.settingsEditorTab.classList.toggle('is-hidden', !editor);
   refs.settingsWidgetsTab?.classList.toggle('is-hidden', !widgets);
@@ -4418,9 +4447,11 @@ function spacesPaneMarkup() {
       <h3>${escapeXml(t('Hush Spaces'))}</h3>
       <p class="settings-note">${escapeXml(t('Bis zu drei lokale Arbeitsbereiche mit eigener Darstellung, eigenen Symbolen, Dock-Pins und Widgets.'))}</p>
       <div class="spaces-list" data-space-role="list"></div>
-      <div class="settings-actions">
-        <button class="settings-button" type="button" data-space-action="add">${escapeXml(t('Space hinzufügen'))}</button>
-        <span class="settings-note" data-space-role="count">0 / 3</span>
+      <div class="spaces-footer">
+        <button class="settings-button" type="button" data-space-action="add">
+          <span class="glyph" data-icon="plus"></span>${escapeXml(t('Space hinzufügen'))}
+        </button>
+        <span class="spaces-footer__count" data-space-role="count">0 / 3</span>
       </div>
       <p class="settings-video-status" data-space-role="status"></p>
     </section>`;
@@ -4432,12 +4463,18 @@ function renderSpacesPane() {
   const list = $('[data-space-role="list"]', pane);
   if (!list) return;
   list.innerHTML = '';
-  state.spaces.forEach((space) => {
+  state.spaces.forEach((space, index) => {
     const active = space.id === state.activeSpaceId;
     const row = el('div', `space-row${active ? ' is-active' : ''}`);
     row.dataset.spaceId = space.id;
-    const swatch = el('span', 'space-row__swatch');
-    swatch.style.backgroundColor = space.color;
+    row.style.setProperty('--space-color', space.color);
+
+    // Marker: the Space color as a dot, with a ring when the Space is live.
+    const marker = el('span', 'space-row__marker');
+    marker.style.backgroundColor = space.color;
+    marker.setAttribute('aria-hidden', 'true');
+
+    const main = el('div', 'space-row__main');
     const name = el('input', 'settings-input space-row__name');
     name.type = 'text';
     name.maxLength = 32;
@@ -4445,29 +4482,52 @@ function renderSpacesPane() {
     name.dataset.spaceRole = 'name';
     name.dataset.spaceId = space.id;
     name.setAttribute('aria-label', t('Space-Name'));
-    const color = el('input', 'settings-input settings-input--color');
+
+    const meta = el('div', 'space-row__meta');
+    const position = el('span', 'space-row__index');
+    position.textContent = `${index + 1}`;
+    const contents = el('span', 'space-row__contents');
+    const pinCount = Array.isArray(space.pinned) ? space.pinned.length : 0;
+    const widgetCount = Array.isArray(space.widgets) ? space.widgets.length : 0;
+    const iconCount = Array.isArray(space.desktop) ? space.desktop.length : 0;
+    contents.textContent = [
+      plural(iconCount, 'Symbol', 'Symbole'),
+      plural(pinCount, 'Dock-Pin', 'Dock-Pins'),
+      plural(widgetCount, 'Widget', 'Widgets')
+    ].join(' · ');
+    meta.append(position, contents);
+
+    const color = el('input', 'space-row__color');
     color.type = 'color';
     color.value = space.color;
     color.dataset.spaceRole = 'color';
     color.dataset.spaceId = space.id;
     color.setAttribute('aria-label', t('Space-Farbe'));
-    const badge = el('span', 'space-row__badge');
-    badge.textContent = active ? t('Aktiv') : '';
+
     const actions = el('div', 'space-row__actions');
-    const switchButton = el('button', 'settings-button settings-button--small');
-    switchButton.type = 'button';
-    switchButton.textContent = t('Wechseln');
-    switchButton.dataset.spaceAction = 'switch';
-    switchButton.dataset.spaceId = space.id;
-    switchButton.disabled = active;
-    const removeButton = el('button', 'settings-button settings-button--small');
-    removeButton.type = 'button';
-    removeButton.textContent = t('Space löschen');
-    removeButton.dataset.spaceAction = 'remove';
-    removeButton.dataset.spaceId = space.id;
-    removeButton.disabled = active || state.spaces.length <= 1;
-    actions.append(switchButton, removeButton);
-    row.append(swatch, name, color, badge, actions);
+    const badge = el('span', 'space-row__badge');
+    if (active) {
+      badge.textContent = t('Aktiv');
+      actions.append(badge);
+    } else {
+      const switchButton = el('button', 'settings-button settings-button--small');
+      switchButton.type = 'button';
+      switchButton.textContent = t('Wechseln');
+      switchButton.dataset.spaceAction = 'switch';
+      switchButton.dataset.spaceId = space.id;
+      const removeButton = el('button', 'settings-button settings-button--small space-row__remove');
+      removeButton.type = 'button';
+      removeButton.title = t('Space löschen');
+      removeButton.setAttribute('aria-label', `${t('Space löschen')}: ${space.name}`);
+      removeButton.append(iconEl('trash', 'glyph'));
+      removeButton.dataset.spaceAction = 'remove';
+      removeButton.dataset.spaceId = space.id;
+      removeButton.disabled = state.spaces.length <= 1;
+      actions.append(switchButton, removeButton);
+    }
+
+    main.append(name, meta);
+    row.append(marker, main, color, actions);
     list.append(row);
   });
   const addButton = $('[data-space-action="add"]', pane);
