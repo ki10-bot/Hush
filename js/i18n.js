@@ -433,7 +433,7 @@ const PATTERNS = [
   { re: /^(\d+) %$/, render: (lang, m) => `${m[1]} %` },
   { re: /^(\d+) px$/, render: (lang, m) => `${m[1]} px` },
   { re: /^(\d+) Min$/, render: (lang, m) => lang === 'ru' ? `${m[1]} мин` : `${m[1]} min` },
-  { re: /^Hush 2\.1\.0 · (.+) öffnet die Suche · F2 benennt Desktop-Symbole um$/, render: (lang, m) => lang === 'ru' ? `Hush 2.1.0 · ${m[1]} открывает поиск · F2 переименовывает значки` : `Hush 2.1.0 · ${m[1]} opens search · F2 renames desktop icons` }
+  { re: /^Hush 2\.1\.1 · (.+) öffnet die Suche · F2 benennt Desktop-Symbole um$/, render: (lang, m) => lang === 'ru' ? `Hush 2.1.1 · ${m[1]} открывает поиск · F2 переименовывает значки` : `Hush 2.1.1 · ${m[1]} opens search · F2 renames desktop icons` }
 ];
 
 export function currentLanguage() {

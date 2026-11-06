@@ -341,7 +341,7 @@ const BUILTIN_ITEMS = {
   'app:spaces': { id: 'app:spaces', kind: 'app', app: 'spaces', title: 'Spaces' }
 };
 
-const APP_VERSION = '2.1.0';
+const APP_VERSION = '2.1.1';
 const MAX_SPACES = 3;
 const DEFAULT_SPACE_ID = 'space-main';
 const SPACE_COLORS = Object.freeze(['#b7b7bc', '#8ea4d2', '#c7a6b8', '#a8c9b5', '#d2bd96']);
@@ -1901,7 +1901,7 @@ function renderDock() {
   refs.dock.innerHTML = '';
 
   const recents = state.recents.slice(0, state.settings.recents);
-  const total = 4 + state.pinned.length + recents.length;
+  const total = 3 + state.pinned.length + recents.length;
   const size = total > 15 ? 34 : total > 12 ? 38 : total > 9 ? 42 : 46;
   refs.dock.style.setProperty('--dock-icon', `${size}px`);
 
@@ -1915,13 +1915,6 @@ function renderDock() {
   dockSeparator();
   appendDockItem(BUILTIN_ITEMS['app:settings'], 'dock-app', false, false, size);
   appendDockItem(BUILTIN_ITEMS['app:widgets'], 'dock-app', false, false, size);
-  const spacesButton = appendDockItem(BUILTIN_ITEMS['app:spaces'], 'dock-app', false, false, size);
-  const currentSpace = activeSpace();
-  if (currentSpace) {
-    spacesButton.classList.add('is-space-active');
-    spacesButton.style.setProperty('--space-color', currentSpace.color);
-    spacesButton.dataset.spaceName = currentSpace.name;
-  }
 }
 
 function lookupDockItem(button) {

@@ -2422,7 +2422,8 @@ body.theme-color .dock-item__dot { background: #f4f4f7; }
 .settings-tab.is-active { color: var(--text); background: rgba(255, 255, 255, .14); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .10); }
 .settings-window__panes { flex: 1; min-height: 0; }
 .settings-window .settings-panel { position: relative; inset: auto; width: auto; height: auto; max-height: none; border: 0 !important; border-radius: 0; background: transparent !important; box-shadow: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; display: block; opacity: 1; transform: none; pointer-events: auto; }
-.settings-window .settings-panel.is-hidden, .settings-editor-tab.is-hidden, .settings-widgets-tab.is-hidden { display: none; }
+.settings-window .settings-panel.is-hidden, .settings-editor-tab.is-hidden, .settings-widgets-tab.is-hidden, .settings-spaces-tab.is-hidden { display: none; }
+.settings-window__panes > .is-hidden { display: none !important; }
 .settings-editor-tab { height: 100%; overflow: auto; padding: 18px; }
 .settings-editor-tab .display-editor__bar { position: relative; inset: auto; width: auto; max-width: none; transform: none; display: flex; flex-direction: column; gap: 16px; background: transparent; border: 0; box-shadow: none; padding: 0; }
 .settings-editor-tab .display-editor__controls { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
@@ -2454,7 +2455,8 @@ body.has-video-wallpaper:not(:has(.wallpaper-video.is-active[src])) .wallpaper {
 .settings-window .settings-tabs { background: transparent; }
 .settings-window .settings-panel,
 .settings-window .settings-editor-tab { background: transparent !important; }
-.settings-window .settings-widgets-tab { background: transparent !important; }
+.settings-window .settings-widgets-tab,
+.settings-window .settings-spaces-tab { background: transparent !important; }
 .window { z-index: 1; }
 
 .display-editor__stage { position: fixed; inset: 0; z-index: 540; display: none; pointer-events: none; }
@@ -2560,5 +2562,4 @@ body.theme-color .hush-widget { background: rgba(255, 255, 255, .085); border-co
 .space-row__badge { font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted-2); white-space: nowrap; }
 .space-row__actions { display: flex; gap: 6px; }
 .space-row__actions .settings-button { white-space: nowrap; }
-.dock-item[data-id="app:spaces"] .dock-item__dot { background: var(--space-color, #b7b7bc); box-shadow: 0 0 7px var(--space-color, #b7b7bc); }
-.dock-item[data-id="app:spaces"].is-space-active .dock-item__dot { opacity: .95; }
+
