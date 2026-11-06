@@ -1,4 +1,4 @@
-# Browser acceptance · Hush 2.1.0
+# Browser acceptance · Hush 2.1.1
 
 This checklist is for a real Chromium browser. jsdom, static audits and HTTP previews do not replace it.
 
@@ -7,7 +7,7 @@ This checklist is for a real Chromium browser. jsdom, static audits and HTTP pre
 - [ ] A reload starts with no Settings window open; the desktop is calm and empty of popups.
 - [ ] Dark, light and color wallpapers keep their selected index per theme; no `dark1.webp`, black fallback or zoom-pop appears.
 - [ ] Parallax follows the pointer subtly without black edges; reduced motion and the Parallax switch override every transform.
-- [ ] The transparent HUSH wordmark sits in the Settings header with the tiny `2.1.0` version beside it; there is no black badge or eyebrow.
+- [ ] The transparent HUSH wordmark sits in the Settings header with the tiny `2.1.1` version beside it; there is no black badge or eyebrow.
 
 ## Settings, Editor, Explorer and Snap
 

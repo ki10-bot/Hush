@@ -341,7 +341,7 @@ const BUILTIN_ITEMS = {
   'app:spaces': { id: 'app:spaces', kind: 'app', app: 'spaces', title: 'Spaces' }
 };
 
-const APP_VERSION = '2.1.0';
+const APP_VERSION = '2.1.1';
 const MAX_SPACES = 3;
 const DEFAULT_SPACE_ID = 'space-main';
 const SPACE_COLORS = Object.freeze(['#b7b7bc', '#8ea4d2', '#c7a6b8', '#a8c9b5', '#d2bd96']);
