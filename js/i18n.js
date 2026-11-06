@@ -399,6 +399,8 @@ const M = {
   'Space gewechselt': { en: 'Space switched', ru: 'Пространство переключено' },
   'Zu Space wechseln': { en: 'Switch to Space', ru: 'Переключить пространство' },
   'Maximal drei Spaces': { en: 'Up to three Spaces', ru: 'До трёх пространств' },
+  'Platz frei': { en: 'slot free', ru: 'место свободно' },
+  'Plätze frei': { en: 'slots free', ru: 'мест свободно' },
   'Bis zu drei lokale Arbeitsbereiche mit eigener Darstellung, eigenen Symbolen, Dock-Pins und Widgets.': { en: 'Up to three local workspaces, each with its own appearance, shortcuts, Dock pins and widgets.', ru: 'До трёх локальных рабочих пространств с собственным оформлением, ярлыками, закреплениями и виджетами.' },
   'Space öffnen': { en: 'Open Spaces', ru: 'Открыть пространства' },
   'Space umbenennen': { en: 'Rename Space', ru: 'Переименовать пространство' },
@@ -433,7 +435,7 @@ const PATTERNS = [
   { re: /^(\d+) %$/, render: (lang, m) => `${m[1]} %` },
   { re: /^(\d+) px$/, render: (lang, m) => `${m[1]} px` },
   { re: /^(\d+) Min$/, render: (lang, m) => lang === 'ru' ? `${m[1]} мин` : `${m[1]} min` },
-  { re: /^Hush 2\.1\.2 · (.+) öffnet die Suche · F2 benennt Desktop-Symbole um$/, render: (lang, m) => lang === 'ru' ? `Hush 2.1.2 · ${m[1]} открывает поиск · F2 переименовывает значки` : `Hush 2.1.2 · ${m[1]} opens search · F2 renames desktop icons` }
+  { re: /^Hush 2\.1\.3 · (.+) öffnet die Suche · F2 benennt Desktop-Symbole um$/, render: (lang, m) => lang === 'ru' ? `Hush 2.1.3 · ${m[1]} открывает поиск · F2 переименовывает значки` : `Hush 2.1.3 · ${m[1]} opens search · F2 renames desktop icons` }
 ];
 
 export function currentLanguage() {
