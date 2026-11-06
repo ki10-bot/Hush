@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Hush — New Tab",
   "short_name": "Hush",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Make Chromium a little calmer, and a little more magical. Hush turns every new tab into a quiet, beautiful space of your own.",
   "minimum_chrome_version": "114",
   "permissions": [
