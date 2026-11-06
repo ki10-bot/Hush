@@ -341,7 +341,7 @@ const BUILTIN_ITEMS = {
   'app:spaces': { id: 'app:spaces', kind: 'app', app: 'spaces', title: 'Spaces' }
 };
 
-const APP_VERSION = '2.1.2';
+const APP_VERSION = '2.1.3';
 const MAX_SPACES = 3;
 const DEFAULT_SPACE_ID = 'space-main';
 const SPACE_COLORS = Object.freeze(['#b7b7bc', '#8ea4d2', '#c7a6b8', '#a8c9b5', '#d2bd96']);
@@ -4446,14 +4446,14 @@ function spacesPaneMarkup() {
     <section class="settings-group">
       <h3>${escapeXml(t('Hush Spaces'))}</h3>
       <p class="settings-note">${escapeXml(t('Bis zu drei lokale Arbeitsbereiche mit eigener Darstellung, eigenen Symbolen, Dock-Pins und Widgets.'))}</p>
-      <div class="spaces-list" data-space-role="list"></div>
+      <div class="spaces-list" data-space-role="list" role="list"></div>
       <div class="spaces-footer">
-        <button class="settings-button" type="button" data-space-action="add">
+        <button class="spaces-add" type="button" data-space-action="add">
           <span class="glyph" data-icon="plus"></span>${escapeXml(t('Space hinzufügen'))}
         </button>
-        <span class="spaces-footer__count" data-space-role="count">0 / 3</span>
+        <span class="spaces-limit" data-space-role="count"></span>
       </div>
-      <p class="settings-video-status" data-space-role="status"></p>
+      <p class="spaces-status" data-space-role="status" aria-live="polite"></p>
     </section>`;
 }
 
@@ -4463,19 +4463,20 @@ function renderSpacesPane() {
   const list = $('[data-space-role="list"]', pane);
   if (!list) return;
   list.innerHTML = '';
-  state.spaces.forEach((space, index) => {
+
+  state.spaces.forEach((space) => {
     const active = space.id === state.activeSpaceId;
     const row = el('div', `space-row${active ? ' is-active' : ''}`);
     row.dataset.spaceId = space.id;
-    row.style.setProperty('--space-color', space.color);
+    row.setAttribute('role', 'listitem');
 
-    // Marker: the Space color as a dot, with a ring when the Space is live.
-    const marker = el('span', 'space-row__marker');
-    marker.style.backgroundColor = space.color;
-    marker.setAttribute('aria-hidden', 'true');
+    // One color signal only: the dot carries the Space color everywhere.
+    const dot = el('span', 'space-row__dot');
+    dot.style.backgroundColor = space.color;
+    dot.setAttribute('aria-hidden', 'true');
 
-    const main = el('div', 'space-row__main');
-    const name = el('input', 'settings-input space-row__name');
+    // The name reads as a label until you touch it.
+    const name = el('input', 'space-row__name');
     name.type = 'text';
     name.maxLength = 32;
     name.value = space.name;
@@ -4483,57 +4484,52 @@ function renderSpacesPane() {
     name.dataset.spaceId = space.id;
     name.setAttribute('aria-label', t('Space-Name'));
 
-    const meta = el('div', 'space-row__meta');
-    const position = el('span', 'space-row__index');
-    position.textContent = `${index + 1}`;
-    const contents = el('span', 'space-row__contents');
-    const pinCount = Array.isArray(space.pinned) ? space.pinned.length : 0;
-    const widgetCount = Array.isArray(space.widgets) ? space.widgets.length : 0;
-    const iconCount = Array.isArray(space.desktop) ? space.desktop.length : 0;
-    contents.textContent = [
-      plural(iconCount, 'Symbol', 'Symbole'),
-      plural(pinCount, 'Dock-Pin', 'Dock-Pins'),
-      plural(widgetCount, 'Widget', 'Widgets')
-    ].join(' · ');
-    meta.append(position, contents);
-
+    // Recolor: the dot itself opens the picker, no separate swatch button.
     const color = el('input', 'space-row__color');
     color.type = 'color';
     color.value = space.color;
     color.dataset.spaceRole = 'color';
     color.dataset.spaceId = space.id;
     color.setAttribute('aria-label', t('Space-Farbe'));
+    color.title = t('Space-Farbe ändern');
 
     const actions = el('div', 'space-row__actions');
-    const badge = el('span', 'space-row__badge');
+
     if (active) {
-      badge.textContent = t('Aktiv');
-      actions.append(badge);
+      const mark = el('span', 'space-row__mark');
+      mark.textContent = t('Aktiv');
+      actions.append(mark);
     } else {
-      const switchButton = el('button', 'settings-button settings-button--small');
+      const switchButton = el('button', 'space-row__action');
       switchButton.type = 'button';
       switchButton.textContent = t('Wechseln');
       switchButton.dataset.spaceAction = 'switch';
       switchButton.dataset.spaceId = space.id;
-      const removeButton = el('button', 'settings-button settings-button--small space-row__remove');
-      removeButton.type = 'button';
-      removeButton.title = t('Space löschen');
-      removeButton.setAttribute('aria-label', `${t('Space löschen')}: ${space.name}`);
-      removeButton.append(iconEl('trash', 'glyph'));
-      removeButton.dataset.spaceAction = 'remove';
-      removeButton.dataset.spaceId = space.id;
-      removeButton.disabled = state.spaces.length <= 1;
-      actions.append(switchButton, removeButton);
+      actions.append(switchButton);
     }
 
-    main.append(name, meta);
-    row.append(marker, main, color, actions);
+    const removeButton = el('button', 'space-row__remove');
+    removeButton.type = 'button';
+    removeButton.title = t('Space löschen');
+    removeButton.setAttribute('aria-label', `${t('Space löschen')}: ${space.name}`);
+    removeButton.append(iconEl('trash', 'glyph'));
+    removeButton.dataset.spaceAction = 'remove';
+    removeButton.dataset.spaceId = space.id;
+    removeButton.disabled = state.spaces.length <= 1 || active;
+    actions.append(removeButton);
+
+    row.append(dot, color, name, actions);
     list.append(row);
   });
+
   const addButton = $('[data-space-action="add"]', pane);
   if (addButton) addButton.disabled = state.spaces.length >= MAX_SPACES;
   const count = $('[data-space-role="count"]', pane);
-  if (count) count.textContent = `${state.spaces.length} / ${MAX_SPACES}`;
+  if (count) {
+    count.textContent = state.spaces.length >= MAX_SPACES
+      ? t('Maximal drei Spaces')
+      : `${MAX_SPACES - state.spaces.length} ${state.spaces.length === MAX_SPACES - 1 ? t('Platz frei') : t('Plätze frei')}`;
+  }
 }
 
 function bindSpacesPane(pane) {

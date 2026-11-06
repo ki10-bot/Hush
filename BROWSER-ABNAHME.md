@@ -1,4 +1,4 @@
-# Browser acceptance · Hush 2.1.2
+# Browser acceptance · Hush 2.1.3
 
 This checklist is for a real Chromium browser. jsdom, static audits and HTTP previews do not replace it.
 
@@ -7,7 +7,7 @@ This checklist is for a real Chromium browser. jsdom, static audits and HTTP pre
 - [ ] A reload starts with no Settings window open; the desktop is calm and empty of popups.
 - [ ] Dark, light and color wallpapers keep their selected index per theme; no `dark1.webp`, black fallback or zoom-pop appears.
 - [ ] Parallax follows the pointer subtly without black edges; reduced motion and the Parallax switch override every transform.
-- [ ] The transparent HUSH wordmark sits in the Settings header with the tiny `2.1.2` version beside it; there is no black badge or eyebrow.
+- [ ] The transparent HUSH wordmark sits in the Settings header with the tiny `2.1.3` version beside it; there is no black badge or eyebrow.
 
 ## Settings, Editor, Explorer and Snap
 
@@ -30,8 +30,12 @@ This checklist is for a real Chromium browser. jsdom, static audits and HTTP pre
 - [ ] Up to three local Spaces can be created; the add control stops at three.
 - [ ] Each Space keeps its own theme, wallpaper, desktop shortcuts, Dock pins and widgets after switching.
 - [ ] The Spaces pane only appears on the Spaces tab; switching tabs never leaves it stacked under another pane.
-- [ ] Each Space renders as a card with a color edge, its name as an inline field, a quiet `n Symbole · n Dock-Pins · n Widgets` line, a color well and a trash icon; only the live Space shows the ACTIVE badge.
-- [ ] The add control sits in a footer next to the `n / 3` counter and visibly disables at three Spaces.
+- [ ] Spaces render as one grouped list with hairline dividers, not as separate decorated cards.
+- [ ] Each row carries exactly one color signal: the dot, which doubles as the color picker.
+- [ ] The name reads as a label and only becomes a field on hover or focus.
+- [ ] Switch and delete stay invisible until the row is hovered or focused, and remain keyboard reachable.
+- [ ] The live Space is marked with the word "Aktiv", not a badge, and cannot be deleted.
+- [ ] The footer offers "Space hinzufügen" plus a plain sentence about the free slots and disables at three Spaces.
 - [ ] There is no separate Spaces icon in the Dock; Spaces stay reachable through Settings, search and the Settings context menus.
 - [ ] Search switches Spaces; rename and Space color persist.
 - [ ] Switching to a light Space uses its light wallpaper, never a dark fallback or black frame.
