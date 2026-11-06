@@ -1,1 +1,0 @@
-Make Chromium a little calmer, and a little more magical. Hush turns every new tab into a quiet, beautiful space of your own.
