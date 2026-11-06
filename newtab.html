@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <link rel="icon" href="assets/icon32.png">
+  <title>Hush</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="wallpaper" id="wallpaper" aria-hidden="true"></div>
+  <div class="wallpaper wallpaper--next" id="wallpaperNext" aria-hidden="true"></div>
+  <video class="wallpaper-video" id="wallpaperVideo" aria-hidden="true" muted loop playsinline autoplay></video>
+  <div class="wallpaper-tint" aria-hidden="true"></div>
+  <div class="wallpaper-vignette" aria-hidden="true"></div>
+  <canvas class="ambient-canvas" id="ambientCanvas" aria-hidden="true"></canvas>
+
+  <div class="desktop-shell" id="app">
+    <div class="clock-display" id="clockDisplay" role="button" tabindex="0" aria-label="Suche öffnen" title="Suche öffnen" aria-keyshortcuts="Space" data-shortcut="Space">
+      <time class="clock" id="clock">
+        <span class="clock__time" id="clockTime">00:00</span>
+        <span class="clock__date" id="clockDate">HEUTE</span>
+      </time>
+    </div>
+
+    <main class="desktop-surface" id="desktopSurface" data-drop="desktop">
+      <div class="desktop-icons" id="desktopIcons" aria-label="Desktop-Symbole"></div>
+
+    </main>
+
+    <div class="widget-layer" id="widgetLayer" aria-label="Hush Widgets"></div>
+    <div class="windows-layer" id="windowsLayer"></div>
+    <div id="snapPreview" class="snap-preview" aria-hidden="true"></div>
+
+    <div class="dock-wrap" id="dockWrap" data-drop="dock">
+      <div class="dock glass" id="dock" aria-label="Dock"></div>
+    </div>
+    <div class="dock-tooltip" id="dockTooltip" aria-hidden="true"></div>
+
+    <div class="spotlight-overlay" id="spotlightOverlay" aria-hidden="true">
+      <div class="spotlight-panel glass" role="dialog" aria-modal="true" aria-label="Hush Suche">
+        <div class="spotlight-search">
+          <span class="glyph" data-icon="search"></span>
+          <input id="spotlightInput" type="search" placeholder="Lesezeichen, Websites und Befehle suchen …" autocomplete="off" spellcheck="false">
+          <kbd>Esc</kbd>
+        </div>
+        <div class="spotlight-results" id="spotlightResults" role="listbox"></div>
+        <div class="spotlight-footer">
+          <span><kbd>↑</kbd><kbd>↓</kbd> Navigieren</span>
+          <span><kbd>↵</kbd> Öffnen</span>
+          <span class="spotlight-footer__brand"><img class="brand-glyph" src="assets/hush-mark.png" alt=""> Hush Suche</span>
+        </div>
+      </div>
+    </div>
+
+    <aside class="settings-panel" id="settingsPanel" aria-hidden="true" aria-label="Darstellung · Hush">
+      <header class="settings-head">
+        <div class="settings-head__brand">
+          <span class="settings-wordmark" role="img" aria-label="Hush"></span>
+          <span class="settings-version" data-role="app-version" aria-label="Hush version 2.1.0">2.1.0</span>
+          <h2>Darstellung</h2>
+        </div>
+        <button class="settings-close" id="closeSettings" type="button" aria-label="Schließen" title="Schließen"><span class="glyph" data-icon="close"></span></button>
+      </header>
+
+      <div class="settings-body">
+        <section class="settings-group">
+          <h3>Sprache &amp; Uhr</h3>
+          <div class="settings-line">
+            <div class="settings-line__text"><strong>Sprache</strong><small>Sprache der Oberfläche</small></div>
+            <select id="setLanguage" class="settings-select" aria-label="Sprache">
+              <option value="en">English</option>
+              <option value="de">Deutsch</option>
+              <option value="ru">Русский</option>
+            </select>
+          </div>
+          <div class="settings-line">
+            <div class="settings-line__text"><strong>Such-Shortcut</strong><small id="setSearchShortcutHint" aria-live="polite">Leertaste öffnet die Suche</small></div>
+            <button class="settings-button settings-button--small" id="setSearchShortcut" type="button" aria-label="Such-Shortcut ändern" aria-keyshortcuts="Space">Leertaste</button>
+          </div>
+          <div class="settings-line">
+            <div class="settings-line__text"><strong>Sekunden anzeigen</strong><small>Zeit mit HH:MM.SS anzeigen</small></div>
+            <label class="settings-switch"><input type="checkbox" id="setSeconds"><span></span></label>
+          </div>
+          <div class="settings-line">
+            <div class="settings-line__text"><strong>Schrift</strong><small>Schriftart der Uhr</small></div>
+            <select id="setFont" class="settings-select" aria-label="Schrift">
+              <option value="orbitron">Orbitron</option>
+              <option value="redaction10">Redaction 10</option>
+              <option value="redaction">Redaction</option>
+              <option value="bebas">Bebas Neue</option>
+              <option value="beaurivage">Beau Rivage</option>
+              <option value="limelight">Limelight</option>
+              <option value="audiowide">Audiowide</option>
+              <option value="michroma">Michroma</option>
+              <option value="oxanium">Oxanium</option>
+              <option value="chakra">Chakra Petch</option>
+              <option value="rajdhani">Rajdhani</option>
+              <option value="space">Space Grotesk</option>
+              <option value="italiana">Italiana</option>
+              <option value="cormorant">Cormorant Garamond Kursiv</option>
+              <option value="playfair">Playfair Display Kursiv</option>
+              <option value="bodoni">Bodoni Moda Kursiv</option>
+              <option value="custom">Eigene Schriftdatei</option>
+            </select>
+          </div>
+          <div class="settings-line">
+            <div class="settings-line__text"><strong>Eigene Schriftdatei</strong><small>Lokal, .woff2 / .ttf / .otf</small></div>
+            <button class="settings-button" id="customFontButton" type="button">Datei auswählen</button>
+            <input type="file" id="customFontInput" accept=".woff2,.ttf,.otf,font/woff2,font/ttf,font/otf" hidden>
+          </div>
+        </section>
+
+        <section class="settings-group">
+          <h3>Themen</h3>
+          <div class="settings-line">
+            <div class="settings-line__text"><strong>Thema</strong><small>Dunkel, Hell oder transparenter Glas-Dock</small></div>
+            <select id="setTheme" class="settings-select" aria-label="Thema">
+              <option value="dark">Dunkel</option>
+              <option value="light">Hell</option>
+              <option value="color">Farbig</option>
+            </select>
+          </div>
+        </section>
+
+        <section class="settings-group">
+          <h3>Layout</h3>
+          <div class="settings-line">
+            <div class="settings-line__text"><strong>Display Editor</strong><small>Dock, Uhr, Farben und Größe</small></div>
+            <button class="settings-button" id="openDisplayEditor" type="button">Editor öffnen</button>
+          </div>
+          <div class="settings-line settings-line--slider">
+            <div class="settings-line__text"><strong>Rastergröße</strong><small id="setGridSizeValue">104 px</small></div>
+            <input type="range" id="setGridSize" min="80" max="180" step="4" value="104">
+          </div>
+          <div class="settings-line settings-line--slider">
+            <div class="settings-line__text"><strong>Symbolgröße</strong><small id="setIconSizeValue">64 px</small></div>
+            <input type="range" id="setIconSize" min="48" max="112" step="2" value="64">
+          </div>
+          <div class="settings-line">
+            <div class="settings-line__text"><strong>Raster</strong><small>Symbole am Raster ausrichten</small></div>
+            <label class="settings-switch"><input type="checkbox" id="setGridEnabled" checked><span></span></label>
+          </div>
+        </section>
+
+        <section class="settings-group">
+          <h3>Bewegung &amp; Glas</h3>
+          <div class="settings-line">
+            <div class="settings-line__text"><strong>Animationen</strong><small>Ruhige, reduzierte Übergänge</small></div>
+            <label class="settings-switch"><input type="checkbox" id="setAnimations" checked><span></span></label>
+          </div>
+          <div class="settings-line">
+            <div class="settings-line__text"><strong>Dock-Vergrößerung</strong><small>Dezente Bewegung, standardmäßig aus</small></div>
+            <label class="settings-switch"><input type="checkbox" id="setMagnify"><span></span></label>
+          </div>
+          <div class="settings-line">
+            <div class="settings-line__text"><strong>Parallax-Hintergrund</strong><small>Sehr leichte Bewegung</small></div>
+            <label class="settings-switch"><input type="checkbox" id="setParallax" checked><span></span></label>
+          </div>
+          <div class="settings-line">
+            <div class="settings-line__text"><strong>Bild abdunkeln</strong><small>Standardmäßig aus; helle Bilder bleiben hell</small></div>
+            <label class="settings-switch"><input type="checkbox" id="setDarkenWallpaper"><span></span></label>
+          </div>
+          <div class="settings-line settings-line--slider">
+            <div class="settings-line__text"><strong>Abdunklung</strong><small id="setDimValue">42 %</small></div>
+            <input type="range" id="setDim" min="0" max="65" value="42">
+          </div>
+          <div class="settings-line settings-line--slider">
+            <div class="settings-line__text"><strong>Glas &amp; Unschärfe</strong><small id="setGlassValue">52 %</small></div>
+            <input type="range" id="setGlass" min="35" max="85" value="52">
+          </div>
+          <div class="settings-line settings-line--slider">
+            <div class="settings-line__text"><strong>Fenster-Glas</strong><small id="setWindowGlassValue">62 %</small></div>
+            <input type="range" id="setWindowGlass" min="0" max="100" step="2" value="62">
+          </div>
+        </section>
+
+        <section class="settings-group">
+          <h3>Dock</h3>
+          <div class="settings-line">
+            <div class="settings-line__text"><strong>Auto-Ausblenden</strong><small>Dock erscheint an der gewählten Kante</small></div>
+            <label class="settings-switch"><input type="checkbox" id="setDockAutoHide"><span></span></label>
+          </div>
+          <div class="settings-line">
+            <div class="settings-line__text"><strong>Dock-Stil</strong><small>Windows 10 links, Windows 11 zentriert</small></div>
+            <select id="setDockStyle" class="settings-select" aria-label="Dock-Stil">
+              <option value="island">Island</option>
+              <option value="win10">Windows 10</option>
+              <option value="win11">Windows 11</option>
+            </select>
+          </div>
+          <div class="settings-line">
+            <div class="settings-line__text"><strong>Kante</strong><small>Oben, rechts, unten oder links</small></div>
+            <select id="setDockSide" class="settings-select" aria-label="Kante">
+              <option value="bottom">Unten</option>
+              <option value="top">Oben</option>
+              <option value="right">Rechts</option>
+              <option value="left">Links</option>
+            </select>
+          </div>
+          <div class="settings-line">
+            <div class="settings-line__text"><strong>Ausrichtung</strong><small>Position innerhalb der Kante</small></div>
+            <select id="setDockAlign" class="settings-select" aria-label="Ausrichtung">
+              <option value="left">Links</option>
+              <option value="center">Zentriert</option>
+              <option value="right">Rechts</option>
+            </select>
+          </div>
+          <div class="settings-line settings-line--slider">
+            <div class="settings-line__text"><strong>Transparenz</strong><small id="setDockAlphaValue">62 %</small></div>
+            <input type="range" id="setDockAlpha" min="20" max="95" step="1" value="62">
+          </div>
+          <div class="settings-line settings-line--slider">
+            <div class="settings-line__text"><strong>Unschärfe</strong><small id="setDockBlurValue">18 px</small></div>
+            <input type="range" id="setDockBlur" min="0" max="40" step="1" value="18">
+          </div>
+          <div class="settings-line settings-line--slider">
+            <div class="settings-line__text"><strong>Rundung</strong><small id="setDockRadiusValue">22 px</small></div>
+            <input type="range" id="setDockRadius" min="0" max="34" step="1" value="22">
+          </div>
+          <div class="settings-line settings-line--slider">
+            <div class="settings-line__text"><strong>Zuletzt besuchte Websites</strong><small id="setRecentsValue">8 Apps</small></div>
+            <input type="range" id="setRecents" min="4" max="12" value="8">
+          </div>
+        </section>
+
+        <section class="settings-group">
+          <h3>Hintergrund &amp; Desktop</h3>
+          <div class="settings-line">
+            <div class="settings-line__text"><strong>Hintergrund-Pack</strong><small id="wallpaperPackStatus" aria-live="polite">Kein Ordner gewählt</small></div>
+          </div>
+          <div class="settings-actions">
+            <button class="settings-button" id="chooseWallpaperPack" type="button"><span class="glyph" data-icon="folder"></span> Ordner wählen</button>
+            <button class="settings-button" id="clearWallpaperPack" type="button"><span class="glyph" data-icon="refresh"></span> Pack entfernen</button>
+          </div>
+          <div class="settings-line settings-line--slider">
+            <div class="settings-line__text"><strong>Intervall</strong><small id="setWallpaperPackTimerValue">5 Min</small></div>
+            <input type="range" id="setWallpaperPackTimer" min="1" max="120" step="1" value="5">
+          </div>
+          <div class="settings-line">
+            <div class="settings-line__text"><strong>Bei Neuladen wechseln</strong><small>Nächstes Bild beim Öffnen</small></div>
+            <label class="settings-switch"><input type="checkbox" id="setWallpaperPackReload"><span></span></label>
+          </div>
+          <div class="settings-line">
+            <div class="settings-line__text"><strong>Links auf Domain kürzen</strong><small>Nur Origin für neue Pins und Desktop-Links</small></div>
+            <label class="settings-switch"><input type="checkbox" id="setShortenLinks" checked><span></span></label>
+          </div>
+          <div class="settings-line">
+            <div class="settings-line__text"><strong>Video-Hintergrund</strong><small>Lokale Datei oder geprüfte Adresse</small></div>
+          </div>
+          <div class="settings-actions">
+            <button class="settings-button" id="changeWallpaperVideo" type="button"><span class="glyph" data-icon="image"></span> Eigenes Video</button>
+            <button class="settings-button" id="clearWallpaperVideo" type="button"><span class="glyph" data-icon="refresh"></span> Video entfernen</button>
+          </div>
+          <div class="settings-url-row">
+            <input class="settings-input" id="setWallpaperVideoUrl" type="url" placeholder="https://…/hintergrund.mp4" autocomplete="off" spellcheck="false" aria-label="Video-URL">
+            <button class="settings-button settings-button--small" id="applyWallpaperVideoUrl" type="button">Anwenden</button>
+          </div>
+          <p class="settings-video-status" id="wallpaperVideoStatus">Kein Video aktiv</p>
+          <div class="settings-actions">
+            <button class="settings-button" id="changeWallpaper" type="button"><span class="glyph" data-icon="image"></span> Eigenes Bild</button>
+            <button class="settings-button" id="resetWallpaper" type="button"><span class="glyph" data-icon="refresh"></span> Nachtgarten</button>
+          </div>
+          <div class="settings-actions">
+            <button class="settings-button" id="arrangeIcons" type="button"><span class="glyph" data-icon="grid"></span> Anordnen</button>
+            <button class="settings-button settings-button--danger" id="clearDesktop" type="button"><span class="glyph" data-icon="trash"></span> Leeren</button>
+          </div>
+          <p class="settings-note">Einstellungen, Symbole und Pins bleiben lokal. Alle Schriften sind eingebettet; Favicons kommen aus dem Browser-Cache bzw. direkt von offenen Tabs.</p>
+        </section>
+      </div>
+    </aside>
+
+    <div class="display-editor" id="displayEditor" aria-hidden="true">
+      <div class="display-editor__bar" id="displayEditorBar">
+        <div class="display-editor__intro">
+          <strong>Display Editor</strong>
+          <span>Ziehe das Dock an eine Kante. Ziehe die Uhr frei; mit dem Griff unten rechts änderst du ihre Größe.</span>
+        </div>
+        <div class="display-editor__controls">
+          <div class="display-editor__sides" aria-label="Dock-Seite">
+            <button type="button" data-dock-side="top">Oben</button>
+            <button type="button" data-dock-side="right">Rechts</button>
+            <button type="button" data-dock-side="bottom">Unten</button>
+            <button type="button" data-dock-side="left">Links</button>
+          </div>
+          <label class="display-editor__size">Uhr-Größe
+            <input type="range" id="setClockScale" min="60" max="400" step="5" value="100">
+            <span id="setClockScaleValue">100 %</span>
+          </label>
+          <div class="editor-colors">
+            <label class="editor-color">Uhrfarbe
+              <input type="color" id="setClockColor" value="#f4f4f7" aria-label="Uhrfarbe">
+            </label>
+            <div class="editor-presets" aria-label="Uhrfarbe Presets">
+              <button type="button" data-clock-preset="#f4f4f7" title="Weiß" aria-label="Weiß" style="--swatch:#f4f4f7"></button>
+              <button type="button" data-clock-preset="#d8d8dd" title="Silber" aria-label="Silber" style="--swatch:#d8d8dd"></button>
+              <button type="button" data-clock-preset="#9aa3b2" title="Stahlblau" aria-label="Stahlblau" style="--swatch:#9aa3b2"></button>
+              <button type="button" data-clock-preset="#c8a2c8" title="Mauve" aria-label="Mauve" style="--swatch:#c8a2c8"></button>
+              <button type="button" data-clock-preset="#a8c0b4" title="Salbei" aria-label="Salbei" style="--swatch:#a8c0b4"></button>
+            </div>
+            <label class="editor-color">Dockfarbe
+              <input type="color" id="setDockColor" value="#0d0d11" aria-label="Dockfarbe">
+            </label>
+            <div class="editor-presets" aria-label="Dockfarbe Presets">
+              <button type="button" data-dock-preset="#0d0d11" title="Rauchschwarz" aria-label="Rauchschwarz" style="--swatch:#0d0d11"></button>
+              <button type="button" data-dock-preset="#16161c" title="Graphit" aria-label="Graphit" style="--swatch:#16161c"></button>
+              <button type="button" data-dock-preset="#1c1b24" title="Nachtviolett" aria-label="Nachtviolett" style="--swatch:#1c1b24"></button>
+              <button type="button" data-dock-preset="#122026" title="Petrol" aria-label="Petrol" style="--swatch:#122026"></button>
+              <button type="button" data-dock-preset="#241b1b" title="Tiefrot" aria-label="Tiefrot" style="--swatch:#241b1b"></button>
+            </div>
+          </div>
+          <div class="editor-themes" aria-label="Themen">
+            <button type="button" data-theme="dark" title="Dunkel">Dunkel</button>
+            <button type="button" data-theme="light" title="Hell">Hell</button>
+            <button type="button" data-theme="color" title="Farbig">Farbig</button>
+          </div>
+          <button type="button" class="settings-button settings-button--small" id="resetLayout">Zurücksetzen</button>
+          <button type="button" class="settings-button settings-button--small" id="closeDisplayEditor">Fertig</button>
+        </div>
+      </div>
+      <div class="display-editor__stage" id="displayEditorStage">
+        <div class="editor-handle editor-handle--dock" id="editorDockHandle" data-editor-drag="dock" role="button" tabindex="0" title="Dock ziehen" aria-label="Dock ziehen">
+          Dock ziehen
+        </div>
+        <div class="editor-handle editor-handle--clock" id="editorClockHandle" data-editor-drag="clock" role="button" tabindex="0" title="Uhr ziehen" aria-label="Uhr ziehen">
+          Uhr ziehen
+          <span class="editor-handle__resize" data-editor-resize="clock" title="Größe ändern" aria-label="Größe ändern"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="rename-overlay" id="renameOverlay" aria-hidden="true">
+      <div class="rename-dialog glass" role="dialog" aria-modal="true" aria-labelledby="renameTitle">
+        <strong id="renameTitle">Umbenennen</strong>
+        <label for="renameInput" id="renameLabel">Neuer Name</label>
+        <input id="renameInput" type="text" maxlength="80" autocomplete="off" spellcheck="false">
+        <div class="rename-actions">
+          <button type="button" class="settings-button" id="renameCancel">Abbrechen</button>
+          <button type="button" class="settings-button settings-button--primary" id="renameConfirm">Speichern</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="launch-overlay" id="launchOverlay" aria-hidden="true">
+      <div class="launch-overlay__morph" aria-hidden="true"></div>
+      <div class="launch-loader" aria-hidden="true">
+        <svg class="launch-loader__h" viewBox="0 0 120 120">
+          <defs>
+            <path id="launchHShape" d="M18 10 H42 V48 H78 V10 H102 V110 H78 V72 H42 V110 H18 Z"/>
+            <clipPath id="launchHClip"><use href="#launchHShape"/></clipPath>
+          </defs>
+          <use href="#launchHShape" class="launch-loader__outline"/>
+          <g clip-path="url(#launchHClip)">
+            <path class="launch-loader__liquid" d="M-120 0 H0 C14 18 -14 38 0 60 C14 82 -14 102 0 120 H-120 Z"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <div class="context-menu glass" id="contextMenu" role="menu" aria-hidden="true"></div>
+    <div class="drag-ghost" id="dragGhost" aria-hidden="true"></div>
+    <div class="demo-badge glass" id="demoBadge" hidden>Lokale Vorschau</div>
+    <input type="file" id="wallpaperInput" accept="image/*" hidden>
+  <input type="file" id="wallpaperPackInput" accept="image/*" webkitdirectory directory multiple hidden>
+    <input type="file" id="wallpaperVideoInput" accept="video/*" hidden>
+  </div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
